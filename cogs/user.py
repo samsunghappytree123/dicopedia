@@ -101,7 +101,7 @@ class User(commands.Cog):
             ),
         ],
     )
-    @commands.cooldown(1, 21600, commands.BucketType.user)  # ?
+    @commands.cooldown(1, 21600, commands.BucketType.user)
     async def modify(self, ctx, 설명: str):
         if not (await USER_DATABASE.user_find(ctx.author.id)):
             embed = Embed.warn(
@@ -222,6 +222,54 @@ class User(commands.Cog):
         )
         Embed.user_footer(embed, ctx)
         await target.edit(embed=embed, components=[])
+
+    @cog_ext.cog_slash(
+        name="정보",
+        description="사용자의 정보를 확인합니다.",
+        options=[
+            create_option(
+                name="유저",
+                description="확인할 유저를 맨션하세요.",
+                option_type=6,
+                required=False
+            )
+        ]
+    )
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def user_find(self, ctx, 유저 = None):
+        if 유저 is None:
+            유저 = ctx.author
+        user = (await USER_DATABASE.user_find(유저.id))
+        if user is None:
+            embed = Embed.default(
+                title="사용자 정보",
+                description=f"``{self.bot.get_user(user['_id']).name}``님은 서비스에 가입하지 않았어요.",
+                timestamp=ctx.created_at
+            )
+            Embed.user_footer(embed, ctx)
+            return await ctx.send(embed=embed)
+        embed = Embed.default(
+            title="사용자 정보",
+            description=f"``{self.bot.get_user(user['_id']).name}``님의 정보입니다.",
+            timestamp=ctx.created_at,
+        )
+        embed.set_thumbnail(url=self.bot.get_user(user['_id']).avatar_url)
+        embed.add_field(
+            name="유저명",
+            value=f"{self.bot.get_user(user['_id']).name}#{self.bot.get_user(user['_id']).discriminator}",
+            inline=False,
+        )
+        embed.add_field(
+            name="설명",
+            value=user["description"],
+            inline=False,
+        )
+        embed.add_field(
+            name="가입일",
+            value=user["created_at"].strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
+            inline=False,
+        )
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
