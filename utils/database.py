@@ -44,18 +44,18 @@ class USER_DATABASE:
         new_description (str) - 필수, 30자를 넘지 않는 새로운 사용자 설명 입력
         """
         if len(new_description) > 30:
-            return "설명은 30자를 넘을 수 없습니다."
+            return {"status": "failed", "content": "설명은 30자를 넘을 수 없어요."}
         await client.user.update_one(
             {"_id": user_id}, {"$set": {"description": new_description}}
         )
-        return "사용자 설명이 업데이트되었습니다."
+        return {"status": "success", "content": "사용자 설명이 업데이트되었어요."}
+
 
 class WIKI_DATABASE:
-    async def wiki_find(wiki_name:str):
+    async def wiki_find(wiki_name: str):
         """
         wiki_name (str) - 필수, 위키 이름 입력
 
         * todo : 정규식을 사용하여 알맞은 문서 정보가 없을 때 추천 문서를 보여주는 기능 추가
         """
         return await client.wiki.find_one({"_id": wiki_name})
-        
