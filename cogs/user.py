@@ -75,7 +75,7 @@ class User(commands.Cog):
                 return await target.edit(embed=cancel_embed, components=[])
         except asyncio.TimeoutError:
             cancel_embed = Embed.warn(
-                description="시간초과로 취소되었어요.",
+                description="시간 초과로 취소되었어요.",
                 timestamp=ctx.created_at,
             )
             Embed.user_footer(cancel_embed, ctx)
@@ -255,7 +255,7 @@ class User(commands.Cog):
         if user is None:
             embed = Embed.default(
                 title="사용자 정보",
-                description=f"``{self.bot.get_user(user['_id']).name}``님은 서비스에 가입하지 않았어요.",
+                description=f"``{self.bot.get_user(유저.id).name}``님은 서비스에 가입하지 않았어요.",
                 timestamp=ctx.created_at,
             )
             Embed.user_footer(embed, ctx)
@@ -272,12 +272,12 @@ class User(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="설명",
+            name="유저 소개",
             value=user["description"],
             inline=False,
         )
         embed.add_field(
-            name="가입일",
+            name=f"{self.bot.user.name} 가입일",
             value=user["created_at"].strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
             inline=False,
         )
