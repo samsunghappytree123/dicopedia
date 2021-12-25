@@ -1,4 +1,5 @@
 import discord
+import asyncio
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
@@ -9,7 +10,6 @@ from discord_slash.utils.manage_components import (
 )
 from discord_slash.model import ButtonStyle, SlashCommandPermissionType
 from utils.embed import Embed
-import asyncio
 from utils.database import USER_DATABASE
 
 
@@ -134,6 +134,9 @@ class User(commands.Cog):
                     and res.origin_message_id == target.id
                 )
 
+            ctx.message = ctx
+            self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
+
             try:
                 res: ComponentContext = await wait_for_component(
                     self.bot,
@@ -206,6 +209,8 @@ class User(commands.Cog):
                     timestamp=ctx.created_at,
                 )
                 Embed.user_footer(cancel_embed, ctx)
+                ctx.message = ctx
+                self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
                 return await target.edit(embed=cancel_embed, components=[])
         except asyncio.TimeoutError:
             cancel_embed = Embed.warn(
@@ -213,6 +218,8 @@ class User(commands.Cog):
                 timestamp=ctx.created_at,
             )
             Embed.user_footer(cancel_embed, ctx)
+            ctx.message = ctx
+            self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
             return await target.edit(embed=cancel_embed, components=[])
         await USER_DATABASE.user_edit_description(ctx.author.id, 설명)
         embed = Embed.default(
