@@ -54,7 +54,7 @@ class USER_DATABASE:
 
 
 class WIKI_DATABASE:
-    async def wiki_find(wiki_name: str):
+    async def wiki_find(wiki_name: str, user_id: int):
         """
         wiki_name (str) - 필수, 위키 문서 이름 입력
         user_id (int) - 필수, 요청한 유저 ID 입력
@@ -69,9 +69,10 @@ class WIKI_DATABASE:
                 return {"status": "failed", "content": "일반 유저는 열람할 수 없는 문서에요."}
         return {"status": "success", "content": result}
 
-    async def wiki_content_find(wiki_name: str, r: int = None):
+    async def wiki_content_find(wiki_name: str, user_id: int, r: int = None):
         """
         wiki_name (str) - 필수, 위키 문서 이름 입력
+        user_id: (int) - 필수, 요청한 유저 ID 입력
         r (int) - 선택, 확인하고 싶은 편집판(r) 번호 입력
         """
         result = await client.wiki.find_one({"_id": wiki_name})
