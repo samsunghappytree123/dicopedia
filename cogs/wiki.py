@@ -203,7 +203,7 @@ class Wiki(commands.Cog, name="위키"):
                             description=f"성공적으로 문서가 생성되었어요.",
                         )
                         Embed.user_footer(embed, ctx)
-                        await m.delete()
+                        await target.delete()
                         return await ctx.send(embed=embed, hidden=True)
                     else:
                         embed = Embed.error(
@@ -211,7 +211,7 @@ class Wiki(commands.Cog, name="위키"):
                             description=f"문서 생성을 실패하였습니다.\n다시 시도해주세요.\n\n실패 사유 : {result['content']}",
                         )
                         Embed.user_footer(embed, ctx)
-                        await m.delete()
+                        await target.delete()
                         return await ctx.send(embed=embed, hidden=True)
                 except asyncio.TimeoutError:
                     cancel_embed = Embed.warn(
