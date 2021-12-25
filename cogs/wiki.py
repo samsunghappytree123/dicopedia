@@ -32,7 +32,7 @@ class Wiki(commands.Cog, name="위키"):
         ],
     )
     async def doc_create(self, ctx, 제목: str):
-        if (await WIKI_DATABASE.wiki_find(제목)) != None:
+        if (await WIKI_DATABASE.wiki_find(제목, ctx.author.id)) != None:
             embed = Embed.warn(
                 timestamp=ctx.created_at,
                 description=f"이미 내용이 존재하는 문서에요.",
@@ -94,7 +94,7 @@ class Wiki(commands.Cog, name="위키"):
         ],
     )
     async def doc_view(self, ctx, 제목: str, 편집판: int = None):
-        if (await WIKI_DATABASE.wiki_find(제목)) == None:
+        if (await WIKI_DATABASE.wiki_find(제목, ctx.author.id)) == None:
             embed = Embed.warn(
                 timestamp=ctx.created_at,
                 description=f"존재하지 않는 문서에요.",
@@ -102,7 +102,7 @@ class Wiki(commands.Cog, name="위키"):
             Embed.user_footer(embed, ctx)
             return await ctx.send(embed=embed, hidden=True)
 
-        result = await WIKI_DATABASE.wiki_content_find(제목, 편집판)
+        result = await WIKI_DATABASE.wiki_content_find(제목, 편집판, ctx.author.id)
 
         if result["status"] == "failed":
             embed = Embed.warn(description=result["content"])
@@ -129,7 +129,7 @@ class Wiki(commands.Cog, name="위키"):
         ],
     )
     async def doc_modify(self, ctx, 제목: str):
-        doc = await WIKI_DATABASE.wiki_find(제목)
+        doc = await WIKI_DATABASE.wiki_find(제목, ctx.author.id)
         if doc == None:
             embed = Embed.warn(
                 description="존재하지 않는 문서에요.\n해당 제목을 가진 문서를 생성하시겠어요?",
