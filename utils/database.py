@@ -25,13 +25,6 @@ class USER_DATABASE:
                 "created_at": datetime.datetime.now(),
             }
         )
-        # return await client.user.insert_one(
-        #     {
-        #         "userid": user_id,
-        #         "description": "아직 설명이 없습니다.",
-        #         "created_at": datetime.datetime.now(),
-        #     }
-        # )
 
     async def user_list(filter: dict = None):
         """
