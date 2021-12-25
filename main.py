@@ -1,10 +1,11 @@
-import discord
-from discord.ext import commands
 import os
-import config
-import jishaku
+
 import colorlog
+import config
+import discord
+import jishaku
 from config import LOGGER as logger
+from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 
 

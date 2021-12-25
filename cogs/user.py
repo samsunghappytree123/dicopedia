@@ -1,16 +1,18 @@
-import discord
 import asyncio
+
+import discord
 from discord.ext import commands
-from discord_slash import cog_ext, SlashContext, ComponentContext
-from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash import ComponentContext, SlashContext, cog_ext
+from discord_slash.model import ButtonStyle, SlashCommandPermissionType
+from discord_slash.utils.manage_commands import create_choice, create_option
 from discord_slash.utils.manage_components import (
-    create_button,
     create_actionrow,
+    create_button,
     wait_for_component,
 )
-from discord_slash.model import ButtonStyle, SlashCommandPermissionType
-from utils.embed import Embed
+
 from utils.database import USER_DATABASE
+from utils.embed import Embed
 
 
 class User(commands.Cog):

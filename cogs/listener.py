@@ -1,8 +1,9 @@
+import traceback
+
 import discord
 from discord.ext import commands
-from utils.embed import Embed
 
-import traceback
+from utils.embed import Embed
 
 
 class Listener(commands.Cog):

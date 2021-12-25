@@ -1,7 +1,8 @@
-import motor.motor_asyncio
-import config
 import datetime
 import re
+
+import config
+import motor.motor_asyncio
 
 client = motor.motor_asyncio.AsyncIOMotorClient(config.MONGO_URI).dicopedia
 
