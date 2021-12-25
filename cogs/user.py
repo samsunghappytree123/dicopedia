@@ -134,9 +134,6 @@ class User(commands.Cog):
                     and res.origin_message_id == target.id
                 )
 
-            ctx.message = ctx
-            self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
-
             try:
                 res: ComponentContext = await wait_for_component(
                     self.bot,
@@ -150,6 +147,8 @@ class User(commands.Cog):
                         timestamp=ctx.created_at,
                     )
                     Embed.user_footer(cancel_embed, ctx)
+                    ctx.message = ctx
+                    self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
                     return await target.edit(embed=cancel_embed, components=[])
             except asyncio.TimeoutError:
                 cancel_embed = Embed.warn(
@@ -157,6 +156,8 @@ class User(commands.Cog):
                     timestamp=ctx.created_at,
                 )
                 Embed.user_footer(cancel_embed, ctx)
+                ctx.message = ctx
+                self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
                 return await target.edit(embed=cancel_embed, components=[])
             await USER_DATABASE.user_add(ctx.author.id)
             embed = Embed.default(
@@ -221,12 +222,19 @@ class User(commands.Cog):
             ctx.message = ctx
             self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
             return await target.edit(embed=cancel_embed, components=[])
-        await USER_DATABASE.user_edit_description(ctx.author.id, 설명)
-        embed = Embed.default(
-            title="✅ 정보 변경이 완료되었어요.",
-            description=f"``{ctx.author}``님의 설명을 ``{설명}``으로 변경하였어요!",
-            timestamp=ctx.created_at,
-        )
+        result = await USER_DATABASE.user_edit_description(ctx.author.id, 설명)
+        if result["status"] == "success":
+            embed = Embed.default(
+                title="✅ 정보 변경이 완료되었어요.",
+                description=f"``{ctx.author}``님의 설명을 ``{설명}``으로 변경하였어요!",
+                timestamp=ctx.created_at,
+            )
+        else:
+            embed = Embed.default(
+                title="❎ 정보 변경에 실패했어요.",
+                description=f"{result['content']}",
+                timestamp=ctx.created_at,
+            )
         Embed.user_footer(embed, ctx)
         await target.edit(embed=embed, components=[])
 
