@@ -67,7 +67,7 @@ class WIKI_DATABASE:
         user_id (int) - 필수, 요청한 유저 ID 입력
 
         * todo : 정규식을 사용하여 알맞은 문서 정보가 없을 때 추천 문서를 보여주는 기능 추가
-        """
+        # """
         result = await client.wiki.find_one({"_id": wiki_name})
         if result is None:
             return None
@@ -183,18 +183,27 @@ class WIKI_DATABASE:
                 wiki_list.append(i)
         return wiki_list
 
-    async def wiki_add_report(wiki_name: str, user_id: int):
+    async def wiki_add_report(wiki_name: str, reportType: str, user_id: int):
         """
         wiki_name (str) - 필수, 신고된 문서 이름 입력
+        reportType (str) - 필수, 신고 유형 입력
         user_id (int) - 필수, 신고한 유저 아이디 입력
         """
         try:
-            await client.wiki.update_one(
+            c1 = await client.wiki.update_one(
                 {"_id": wiki_name}, {"$inc": {"reportNum": 1}}
             )
-            await client.report.insert_one(
-                {"wiki_name": wiki_name, "reported_at": datetime.datetime.now(), "reportUser": user_id}
+            print(c1)
+            c2 = await client.report.insert_one(
+                {"wiki_name": wiki_name, "reportType": reportType, "reported_at": datetime.datetime.now(), "reportUser": user_id}
             )
+            print(c2)
+            if int((await client.wiki.find_one({"_id": wiki_name}))["reportNum"]) >= 5:
+                c3 = await client.wiki.update_one(
+                    {"_id": wiki_name}, {"$set": {"acl": {"edit_admin": True, "read_admin": True}}}
+                )
+                print(c3)
+                return {"status": "success", "content": "신고가 5회 이상 접수되어 열람 불가 상태로 변경하였어요.."}
             return {"status": "success", "content": "신고가 접수되었어요."}
         except:
-            return {"status": "fail", "content": "신고 접수를 실패했어요."}
+            return {"status": "fail", "content": f"\n{__import__('traceback').format_exc()}"}
