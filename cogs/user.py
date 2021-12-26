@@ -34,8 +34,8 @@ class User(commands.Cog):
             return await ctx.send(embed=embed, hidden=True)
         embed = Embed.default(
             title="서비스 가입",
-            description="암튼 내용임 ㅇㅇ",
-            timestamp=ctx.created_at,
+            description=f"``{ctx.bot.user.name}`` 서비스는 아래의 정보를 수집합니다.\n```md\n1. 유저의 디스코드 ID\n2. 유저의 서비스 가입일\n3. 서비스 이용 횟수(익명 저장)```",
+            timestamp=ctx.created_at
         )
         Embed.user_footer(embed, ctx)
         buttons = [
@@ -108,7 +108,7 @@ class User(commands.Cog):
         if not (await USER_DATABASE.user_find(ctx.author.id)):
             embed = Embed.warn(
                 timestamp=ctx.created_at,
-                description=f"서비스에 가입되어있지 않아요. 가입하시겠어요?",
+                description=f"서비스에 가입되어있지 않아요. 가입하시겠어요?\n\n``{ctx.bot.user.name}`` 서비스는 아래의 정보를 수집합니다.\n```md\n1. 유저의 디스코드 ID\n```",
             )
             Embed.user_footer(embed, ctx)
             buttons = [
