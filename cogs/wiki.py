@@ -71,6 +71,7 @@ class Wiki(commands.Cog, name="위키"):
             if content.content == "취소":
                 return await m.edit("사용자에 의해 취소되었습니다.", embed = None)
             result = await WIKI_DATABASE.wiki_create(제목, content.content, ctx.author.id)
+            await content.delete()
             if result["status"] == "success":
                 embed = Embed.default(
                     timestamp=ctx.created_at,
@@ -168,7 +169,7 @@ class Wiki(commands.Cog, name="위키"):
     @cog_check()
     async def doc_modify(self, ctx, 제목: str):
         doc = await WIKI_DATABASE.wiki_content_find(제목, ctx.author.id)
-        if doc == None:
+        if doc['status'] == "failed":
             embed = Embed.warn(
                 description="존재하지 않는 문서에요.\n해당 제목을 가진 문서를 생성하시겠어요?",
                 timestamp=ctx.created_at,
@@ -212,8 +213,6 @@ class Wiki(commands.Cog, name="위키"):
                         timestamp=ctx.created_at,
                     )
                     Embed.user_footer(cancel_embed, ctx)
-                    ctx.message = ctx
-                    self.bot.slash.commands[ctx.name].reset_cooldown(ctx)
                     return await target.edit(embed=cancel_embed, components=[])
                 embed = Embed.default(
                     title="✅ 문서 생성이 완료되었어요.",
