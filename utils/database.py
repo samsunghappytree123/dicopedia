@@ -7,7 +7,7 @@ import motor.motor_asyncio
 client = motor.motor_asyncio.AsyncIOMotorClient(config.MONGO_URI).dicopedia
 
 
-class USER_DATABASE:    
+class USER_DATABASE:
     async def user_find(user_id: int):
         """
         user_id (int) - 필수, 디스코드 유저 ID 입력
@@ -67,7 +67,7 @@ class WIKI_DATABASE:
         user_id (int) - 필수, 요청한 유저 ID 입력
 
         * todo : 정규식을 사용하여 알맞은 문서 정보가 없을 때 추천 문서를 보여주는 기능 추가
-        # """
+        #"""
         result = await client.wiki.find_one({"_id": wiki_name})
         if result is None:
             return None
@@ -165,10 +165,9 @@ class WIKI_DATABASE:
         keyword (str) - 필수, 검색할 키워드 입력
         user_id (int) - 필수, 요청한 유저 ID 입력
         """
-        result = client.wiki.find({'_id': {'$regex': keyword}})
+        result = client.wiki.find({"_id": {"$regex": keyword}})
         search_result = [i async for i in result]
         return search_result
-
 
     async def wiki_list(filter: dict = None):
         """
@@ -195,15 +194,27 @@ class WIKI_DATABASE:
             )
             print(c1)
             c2 = await client.report.insert_one(
-                {"wiki_name": wiki_name, "reportType": reportType, "reported_at": datetime.datetime.now(), "reportUser": user_id}
+                {
+                    "wiki_name": wiki_name,
+                    "reportType": reportType,
+                    "reported_at": datetime.datetime.now(),
+                    "reportUser": user_id,
+                }
             )
             print(c2)
             if int((await client.wiki.find_one({"_id": wiki_name}))["reportNum"]) >= 5:
                 c3 = await client.wiki.update_one(
-                    {"_id": wiki_name}, {"$set": {"acl": {"edit_admin": True, "read_admin": True}}}
+                    {"_id": wiki_name},
+                    {"$set": {"acl": {"edit_admin": True, "read_admin": True}}},
                 )
                 print(c3)
-                return {"status": "success", "content": "신고가 5회 이상 접수되어 열람 불가 상태로 변경하였어요.."}
+                return {
+                    "status": "success",
+                    "content": "신고가 5회 이상 접수되어 열람 불가 상태로 변경하였어요..",
+                }
             return {"status": "success", "content": "신고가 접수되었어요."}
         except:
-            return {"status": "fail", "content": f"\n{__import__('traceback').format_exc()}"}
+            return {
+                "status": "fail",
+                "content": f"\n{__import__('traceback').format_exc()}",
+            }

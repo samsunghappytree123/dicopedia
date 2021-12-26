@@ -35,7 +35,7 @@ class User(commands.Cog):
         embed = Embed.default(
             title="서비스 가입",
             description=f"``{ctx.bot.user.name}`` 서비스는 아래의 정보를 수집합니다.\n```md\n1. 유저의 디스코드 ID\n2. 유저의 서비스 가입일\n3. 서비스 이용 횟수(익명 저장)```",
-            timestamp=ctx.created_at
+            timestamp=ctx.created_at,
         )
         Embed.user_footer(embed, ctx)
         buttons = [
