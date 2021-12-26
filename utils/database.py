@@ -7,7 +7,7 @@ import motor.motor_asyncio
 client = motor.motor_asyncio.AsyncIOMotorClient(config.MONGO_URI).dicopedia
 
 
-class USER_DATABASE:
+class USER_DATABASE:    
     async def user_find(user_id: int):
         """
         user_id (int) - 필수, 디스코드 유저 ID 입력
@@ -52,6 +52,12 @@ class USER_DATABASE:
         )
         # await client.user.update_one({"userid": user_id}, {"$set": {"description": new_description}})
         return {"status": "success", "content": "사용자 설명이 업데이트되었어요."}
+
+    async def user_find_document(user_id: int):
+        """
+        user_id (int) - 필수, 디스코드 유저 ID 입력
+        """
+        coll = await client.wiki.find({"m": True})
 
 
 class WIKI_DATABASE:
@@ -107,13 +113,14 @@ class WIKI_DATABASE:
         wiki_content (str) - 필수, 위키 문서 내용 입력
         user_id (int) - 필수, 위키 문서 변경자 입력
         """
-        if (await WIKI_DATABASE.wiki_find(wiki_name)) != None:
+        if (await WIKI_DATABASE.wiki_find(wiki_name, user_id)) != None:
             return {"status": "failed", "content": "이미 존재하는 문서에요."}
         await client.wiki.insert_one(
             {
                 "_id": wiki_name,
                 "created_at": datetime.datetime.now(),
                 "acl": {"edit_admin": False, "read_admin": False},
+                "reportNum": 0,
                 "history": {
                     "r1": {
                         "content": wiki_content,
@@ -131,7 +138,7 @@ class WIKI_DATABASE:
         wiki_content (str) - 필수, 위키 문서 내용 입력
         user_id (int) - 필수, 위키 문서 변경자 입력
         """
-        find_result = await WIKI_DATABASE.wiki_find(wiki_name)
+        find_result = await WIKI_DATABASE.wiki_find(wiki_name, user_id)
         rtip = []
         for i in find_result["content"]["history"]:
             if "r" in i:
@@ -152,3 +159,42 @@ class WIKI_DATABASE:
             {"_id": wiki_name}, {"$set": find_result["content"]}
         )
         return {"status": "success", "content": "문서를 수정하였어요."}
+
+    async def wiki_search(keyword: str, user_id: int):
+        """
+        keyword (str) - 필수, 검색할 키워드 입력
+        user_id (int) - 필수, 요청한 유저 ID 입력
+        """
+        result = client.wiki.find({'_id': {'$regex': keyword}})
+        search_result = [i async for i in result]
+        return search_result
+
+
+    async def wiki_list(filter: dict = None):
+        """
+        filter (dict) - 선택, DICT 형식으로 입력
+        """
+        wiki_list = []
+        if filter:
+            async for i in client.wiki.find(filter):
+                wiki_list.append(i)
+        else:
+            async for i in client.wiki.find({}):
+                wiki_list.append(i)
+        return wiki_list
+
+    async def wiki_add_report(wiki_name: str, user_id: int):
+        """
+        wiki_name (str) - 필수, 신고된 문서 이름 입력
+        user_id (int) - 필수, 신고한 유저 아이디 입력
+        """
+        try:
+            await client.wiki.update_one(
+                {"_id": wiki_name}, {"$inc": {"reportNum": 1}}
+            )
+            await client.report.insert_one(
+                {"wiki_name": wiki_name, "reported_at": datetime.datetime.now(), "reportUser": user_id}
+            )
+            return {"status": "success", "content": "신고가 접수되었어요."}
+        except:
+            return {"status": "fail", "content": "신고 접수를 실패했어요."}
