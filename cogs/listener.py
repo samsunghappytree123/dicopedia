@@ -29,7 +29,7 @@ class Listener(commands.Cog):
     async def on_ready(self):
         self.logger.info(f"📡 {self.bot.user} ({self.bot.user.id}) 준비 완료")
         await self.bot.change_presence(
-            status=discord.Status.idle, activity=discord.Game("꿀잠 자는 중..")
+            status=discord.Status.online, activity=discord.Game("꿀잠 자는 중..")
         )
 
     @commands.Cog.listener()
@@ -292,7 +292,7 @@ class Listener(commands.Cog):
                 res: ComponentContext = await wait_for_component(
                     self.bot, messages=m, check=Ccheck, timeout=60.0
                 )
-                if str(res.custom_id) == "cancel":
+                if str(res.custom_id) == "취소하기":
                     embed = Embed.warn(
                         description="사용자에 의해 취소되었어요.", timestamp=ctx.created_at
                     )
