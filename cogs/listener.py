@@ -1,9 +1,9 @@
 import asyncio
 from datetime import datetime
 import traceback
-
+import config
 import discord, random
-from discord.ext import commands
+from discord.ext import commands, tasks
 import discord_slash
 from discord_slash.context import ComponentContext
 from discord_slash import ComponentContext, SlashContext, cog_ext
@@ -24,6 +24,26 @@ class Listener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.logger = bot.logger
+        if config.KOREANBOTS_TOKEN != "":
+            self.update_koreanbots.start()
+    
+    def cog_unload(self):
+        self.update_koreanbots.stop()
+
+    @tasks.loop(hours=3)
+    async def update_koreanbots(self):
+        await self.bot.wait_until_ready()
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"https://koreanbots.dev/api/v2/bots/{self.bot.user.id}/stats",
+                data={"servers": len(self.bot.guilds), "shards": len(self.bot.shards)},
+                headers={"Authorization": config.KOREANBOTS_TOKEN},
+            ) as res:
+                if res.status != 200:
+                    self.logger.info(f"❌ | 한디리 서버수 업데이트 실패 ({(await res.json())['message']})")
+                else:
+                    self.logger.info(f"✅ | 한디리 서버수 업데이트 성공 ({(await res.json())['message']})")
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -34,7 +54,7 @@ class Listener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_slash_command(self, ctx):
-        print(f"{ctx.author}({ctx.author.id}) - {ctx.command}")
+        self.logger.info(f"{ctx.author}({ctx.author.id}) - {ctx.command}")
 
     @commands.Cog.listener()
     async def on_slash_command_error(self, ctx, error):
