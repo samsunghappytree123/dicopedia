@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, aiohttp
 from datetime import datetime
 import traceback
 import config
